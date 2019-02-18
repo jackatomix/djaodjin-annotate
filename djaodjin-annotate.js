@@ -70,14 +70,14 @@ MIT License
           '<button id="undoaction" title="Undo the last annotation"' +
           ' class="btn btn-primary ' + classPosition2 +
           ' annotate-undo">' +
-          ' <span class="glyphicon glyphicon-arrow-left"></span></button>';
+          ' <span class="glyphicon glyphicon-arrow-left">Undo</span></button>';
         if (self.options.unselectTool) {
           self.$tool += '<label class="btn btn-danger active">' +
             '<input type="radio" name="' + self.toolOptionId +
             '" data-tool="null"' +
             ' data-toggle="tooltip" data-placement="top"' +
             ' title="No tool selected">' +
-            '<span class="glyphicon glyphicon-ban-circle"></span>' +
+            '<span class="glyphicon glyphicon-ban-circle">Clear</span>' +
             '</label>';
         }
         self.$tool += '<label class="btn btn-primary active">' +
@@ -85,33 +85,33 @@ MIT License
           '" data-tool="rectangle"' +
           ' data-toggle="tooltip" data-placement="top"' +
           ' title="Draw an rectangle">' +
-          ' <span class="glyphicon glyphicon-unchecked"></span>' +
+          ' <span class="glyphicon glyphicon-unchecked">Rectangle</span>' +
           '</label><label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="circle"' +
           ' data-toggle="tooltip"' +
           'data-placement="top" title="Write some text">' +
-          ' <span class="glyphicon glyphicon-copyright-mark"></span>' +
+          ' <span class="glyphicon glyphicon-copyright-mark">Circle</span>' +
           '</label><label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="text"' +
           ' data-toggle="tooltip"' +
           'data-placement="top" title="Write some text">' +
-          ' <span class="glyphicon glyphicon-font"></span></label>' +
+          ' <span class="glyphicon glyphicon-font">Text</span></label>' +
           '<label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="arrow"' +
           ' data-toggle="tooltip" data-placement="top" title="Draw an arrow">' +
-          ' <span class="glyphicon glyphicon-arrow-up"></span></label>' +
+          ' <span class="glyphicon glyphicon-arrow-up">Arrow</span></label>' +
           '<label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="pen"' +
           ' data-toggle="tooltip" data-placement="top" title="Pen Tool">' +
-          ' <span class="glyphicon glyphicon-pencil"></span></label>' +
+          ' <span class="glyphicon glyphicon-pencil">Pen</span></label>' +
           '<button type="button" id="redoaction"' +
           ' title="Redo the last undone annotation"' +
           'class="btn btn-primary ' + classPosition2 + ' annotate-redo">' +
-          ' <span class="glyphicon glyphicon-arrow-right"></span></button>' +
+          ' <span class="glyphicon glyphicon-arrow-right">Redo</span></button>' +
           '</div></div>';
       } else {
         self.$tool = '<div id="" style="display:inline-block">' +
@@ -169,7 +169,7 @@ MIT License
         ';word-wrap: break-word;outline-width: 0;overflow: hidden;' +
         'padding:0px"></textarea>');
       $('body').append(self.$textbox);
-      if (self.options.images) {
+      if (self.options.images.length > 0) {
         self.initBackgroundImages();
       } else {
         if (!self.options.width && !self.options.height) {
@@ -179,6 +179,7 @@ MIT License
         self.baseCanvas.width = self.drawingCanvas.width = self.options.width;
         self.baseCanvas.height = self.drawingCanvas.height = self.options
           .height;
+
       }
       self.$tool.on('change', 'input[name^="tool_option"]', function() {
         self.selectTool($(this));
@@ -234,13 +235,12 @@ MIT License
     },
     addElements: function(newStoredElements, set, callback)
     {
-      var self = this; 
-      this.storedElement = newStoredElements; 
-      //console.log('DJ: Adding new annotations'); 
+      var self = this;
+      this.storedElement = newStoredElements;
       self.clear();
       self.redraw();
-      
-    },    
+
+    },
     pushImage: function(newImage, set, callback) {
       var self = this;
       var id = null;
@@ -366,7 +366,7 @@ MIT License
     redraw: function() {
       var self = this;
       self.baseCanvas.width = self.baseCanvas.width;
-      if (self.options.images) {
+      if (self.options.images.length > 0) {
         self.baseContext.drawImage(self.img, 0, 0, self.currentWidth,
           self.currentHeight);
       }
@@ -751,7 +751,7 @@ MIT License
       if (callback) {
         callback(image);
       }
-      self.options.onExport(image);
+      self.options.onExport(image, self);
     }
   };
   $.fn.annotate = function(options, cmdOption, callback) {
@@ -770,7 +770,7 @@ MIT License
         throw new Error('No annotate initialized for: #' + $(this).attr(
           'id'));
       }
-    
+
     }else if (options === 'fill') {
       if ($annotate) {
         $annotate.addElements(cmdOption, true, callback);
@@ -778,7 +778,7 @@ MIT License
         throw new Error('No annotate initialized for: #' + $(this).attr(
           'id'));
       }
-    
+
     } else if (options === 'export') {
       if ($annotate) {
         $annotate.exportImage(cmdOption, callback);
