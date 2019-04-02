@@ -65,54 +65,48 @@ MIT License
         classPosition2 = 'btn-block';
       }
       if (self.options.bootstrap) {
-        self.$tool = '<div id="" class="btn-group" role="group" >' +
-          '<div class="' + classPosition1 + '" data-toggle="buttons">' +
-          '<button id="undoaction" title="Undo the last annotation"' +
-          ' class="btn btn-primary ' + classPosition2 +
-          ' annotate-undo">' +
-          ' <span class="glyphicon glyphicon-arrow-left">Undo</span></button>';
-        if (self.options.unselectTool) {
-          self.$tool += '<label class="btn btn-danger active">' +
-            '<input type="radio" name="' + self.toolOptionId +
-            '" data-tool="null"' +
-            ' data-toggle="tooltip" data-placement="top"' +
-            ' title="No tool selected">' +
-            '<span class="glyphicon glyphicon-ban-circle">Clear</span>' +
-            '</label>';
-        }
-        self.$tool += '<label class="btn btn-primary active">' +
+         self.$tool = '<div id="" class="btn-group" role="group" >' +
+          '<label class="btn btn-primary active">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="rectangle"' +
           ' data-toggle="tooltip" data-placement="top"' +
           ' title="Draw an rectangle">' +
-          ' <span class="glyphicon glyphicon-unchecked">Rectangle</span>' +
+          ' <span class="glyphicon glyphicon-unchecked"><i class="far fa-square"></i></span>' +
           '</label><label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="circle"' +
           ' data-toggle="tooltip"' +
           'data-placement="top" title="Write some text">' +
-          ' <span class="glyphicon glyphicon-copyright-mark">Circle</span>' +
+          ' <span class="glyphicon glyphicon-copyright-mark"><i class="far fa-circle"></i></span>' +
           '</label><label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="text"' +
           ' data-toggle="tooltip"' +
           'data-placement="top" title="Write some text">' +
-          ' <span class="glyphicon glyphicon-font">Text</span></label>' +
+          ' <span class="glyphicon glyphicon-font"><i class="far fa-font"></i></span></label>' +
           '<label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="arrow"' +
           ' data-toggle="tooltip" data-placement="top" title="Draw an arrow">' +
-          ' <span class="glyphicon glyphicon-arrow-up">Arrow</span></label>' +
+          ' <span class="glyphicon glyphicon-arrow-up"><i class="far fa-long-arrow-up"></i></span></label>' +
           '<label class="btn btn-primary">' +
           '<input type="radio" name="' + self.toolOptionId +
           '" data-tool="pen"' +
           ' data-toggle="tooltip" data-placement="top" title="Pen Tool">' +
-          ' <span class="glyphicon glyphicon-pencil">Pen</span></label>' +
+          ' <span class="glyphicon glyphicon-pencil"><i class="far fa-pencil-alt"></i></span></label>' +
+          '</div><div class="btn-group">' +
           '<button type="button" id="redoaction"' +
           ' title="Redo the last undone annotation"' +
           'class="btn btn-primary ' + classPosition2 + ' annotate-redo">' +
-          ' <span class="glyphicon glyphicon-arrow-right">Redo</span></button>' +
-          '</div></div>';
+          ' <span class="glyphicon glyphicon-arrow-right"><i class="far fa-redo"></i></span></button>' +
+          '<button id="undoaction" title="Undo the last annotation"' +
+          ' class="btn btn-primary ' + classPosition2 +
+          ' annotate-undo">' +
+          ' <span class="glyphicon glyphicon-arrow-left"><i class="far fa-undo"></i></span></button>' +
+          '<button id="clear" title="Clear"' +
+          ' class="btn btn-primary annotate-clear">' +
+          ' <span class="glyphicon glyphicon-arrow-left"><i class="far fa-trash-alt"></i></span></button>' +
+          '</div>';
       } else {
         self.$tool = '<div id="" style="display:inline-block">' +
           '<button id="undoaction">UNDO</button>';
@@ -133,34 +127,8 @@ MIT License
           '</div>';
       }
       self.$tool = $(self.$tool);
-      $('.annotate-container').append(self.$tool);
+      $(this.options.toolcontainer).append(self.$tool);
       var canvasPosition = self.$el.offset();
-      if (self.options.position === 'top' || self.options.position !==
-        'top' && !self.options.bootstrap) {
-        self.$tool.css({
-          position: 'absolute',
-          top: -35,
-          left: canvasPosition.left
-        });
-      } else if (self.options.position === 'left' && self.options.bootstrap) {
-        self.$tool.css({
-          position: 'absolute',
-          top: canvasPosition.top - 35,
-          left: canvasPosition.left - 20
-        });
-      } else if (self.options.position === 'right' && self.options.bootstrap) {
-        self.$tool.css({
-          position: 'absolute',
-          top: canvasPosition.top - 35,
-          left: canvasPosition.left + self.baseCanvas.width + 20
-        });
-      } else if (self.options.position === 'bottom' && self.options.bootstrap) {
-        self.$tool.css({
-          position: 'absolute',
-          top: canvasPosition.top + self.baseCanvas.height + 35,
-          left: canvasPosition.left
-        });
-      }
       self.$textbox = $('<textarea id=""' +
         ' style="position:absolute;z-index:100000;display:none;top:0;left:0;' +
         'background:transparent;border:1px dotted; line-height:25px;' +
@@ -190,6 +158,9 @@ MIT License
       });
       self.$tool.on('click', '.annotate-undo', function(event) {
         self.undoaction(event);
+      });
+      self.$tool.on('click', '.annotate-clear', function(event) {
+        self.clearaction(event);
       });
       $(document).on(self.options.selectEvent, '.annotate-image-select',
         function(event) {
@@ -363,6 +334,14 @@ MIT License
       self.clear();
       self.redraw();
     },
+    clearaction: function (event) {
+      event.preventDefault();
+      this.storedElement = []
+      this.storedUndo = [];
+      this.checkUndoRedo();
+      this.clear();
+      this.redraw();
+    },
     redraw: function() {
       var self = this;
       self.baseCanvas.width = self.baseCanvas.width;
@@ -516,6 +495,7 @@ MIT License
     selectTool: function(element) {
       var self = this;
       self.options.type = element.data('tool');
+      element.parent().addClass('active').siblings().removeClass('active');
       if (self.$textbox.is(':visible')) {
         self.pushText();
       }
@@ -805,6 +785,7 @@ MIT License
     idAttribute: 'id',
     selectEvent: 'change',
     unselectTool: false,
+    toolcontainer: '.annotate-container',
     onExport: function(image) {
       console.log(image);
     }
