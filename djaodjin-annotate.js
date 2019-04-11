@@ -345,9 +345,8 @@ MIT License
     redraw: function() {
       var self = this;
       self.baseCanvas.width = self.baseCanvas.width;
-      if (self.options.images.length > 0) {
-        self.baseContext.drawImage(self.img, 0, 0, self.currentWidth,
-          self.currentHeight);
+      if (self.options.images.length > 0 && self.img !== null) {
+        self.baseContext.drawImage(self.img, 0, 0, self.currentWidth, self.currentHeight);
       }
       if (self.storedElement.length === 0) {
         return;
@@ -692,21 +691,16 @@ MIT License
       }
     },
     annotateresize: function() {
-      var self = this;
-      var currentWidth = self.$el.width();
-      var currentcompensationWidthRate = self.compensationWidthRate;
-      self.compensationWidthRate = self.selectImageSize.width /
-        currentWidth;
-      if (self.compensationWidthRate < 1) {
-        self.compensationWidthRate = 1;
-      }
-      self.linewidth = self.options.linewidth * self.compensationWidthRate;
-      self.fontsize = String(parseInt(self.options.fontsize.split('px')[0],
-          10) *
-        self.compensationWidthRate) + 'px';
-      if (currentcompensationWidthRate !== self.compensationWidthRate) {
-        self.redraw();
-        self.clear();
+      if (this.options.width !== this.$el.width()) {
+        this.$el.parent()
+          .attr('disabled', true)
+          .attr('data-expectedwidth', this.options.width)
+          .attr('data-actualwidth', this.$el.width())
+      } else {
+        this.$el.parent()
+          .removeAttr('disabled')
+          .removeAttr('data-expectedwidth')
+          .removeAttr('data-actualwidth')
       }
     },
     destroy: function() {
